@@ -1,0 +1,18 @@
+[package]
+name = "plex-presence"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ctrlc = {version = "3.2.4", features = ["termination"]}
+directories = "4.0.1"
+discord-rich-presence = "0.2.3"
+reqwest = "0.11.13"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.91"
+tokio = { version = "1.23.0", features = ["full"] }
+toml = "0.5.10"
+urlencoding = "2.1.2"
+
