@@ -63,6 +63,7 @@ async fn main() {
             dc_client.update_plex_activity(act);
         } else {
             println!("cannot get session, {:#?}", session_res.unwrap_err());
+            dc_client.clear_activity();
         }
 
         thread::sleep(time::Duration::from_millis(1000));

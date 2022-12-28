@@ -34,6 +34,10 @@ impl<'a> DiscordClient<'a> {
         }
     }
 
+    pub fn clear_activity(&mut self) {
+        let _ = self.ipc_client.clear_activity();
+    }
+
     pub fn update_activity(&mut self, activity: Activity) {
         let set_result = self.ipc_client.set_activity(activity);
         if set_result.is_err() {
@@ -54,7 +58,9 @@ impl<'a> DiscordClient<'a> {
         if self.current.is_some() {
             let current_details = self.current.as_ref().unwrap().details.clone();
             let new_details = new.as_ref().unwrap().details.clone();
-            if new_details == current_details {
+            let current_state = self.current.as_ref().unwrap().state.clone();
+            let new_state = new.as_ref().unwrap().state.clone();
+            if new_details == current_details && current_state == new_state {
                 return;
             }
         }
