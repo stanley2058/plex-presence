@@ -1,14 +1,14 @@
 mod config;
-mod plex;
 mod discord;
+mod plex;
 
-use std::{env, thread, time, fs, panic};
-use std::process::{Command, Stdio, exit};
-use std::collections::HashSet;
-use ctrlc;
-use plex::client::PlexClient;
-use discord::rich_presence::DiscordClient;
 use config::config::Config;
+use ctrlc;
+use discord::rich_presence::DiscordClient;
+use plex::client::PlexClient;
+use std::collections::HashSet;
+use std::process::{exit, Command, Stdio};
+use std::{env, fs, panic, thread, time};
 
 fn parse_args() {
     let args: Vec<String> = env::args().collect();
@@ -29,7 +29,10 @@ fn check_instance() {
     let lockfile = Config::get_lockfile();
     if lockfile.exists() {
         println!("=========================== Lockfile Detected ===========================");
-        println!("The lockfile is still present:\n{}", lockfile.to_str().unwrap());
+        println!(
+            "The lockfile is still present:\n{}",
+            lockfile.to_str().unwrap()
+        );
         println!("This means there might already be a running instance.");
         println!("If the program exited violently last time, delete the lockfile manually.");
         println!("=========================================================================");

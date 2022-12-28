@@ -1,8 +1,12 @@
 pub mod config {
-    use std::{fs, path::{Path, PathBuf}, process::exit};
-    use toml;
     use directories::ProjectDirs;
     use serde::{Deserialize, Serialize};
+    use std::{
+        fs,
+        path::{Path, PathBuf},
+        process::exit,
+    };
+    use toml;
 
     fn discord_application_id() -> String {
         String::from("1057190283017719828")
@@ -14,10 +18,9 @@ pub mod config {
         #[serde(skip)]
         pub origin: String,
         pub token: String,
-        #[serde(skip, default="discord_application_id")]
+        #[serde(skip, default = "discord_application_id")]
         pub discord_application_id: String,
     }
-
 
     impl Default for Config {
         fn default() -> Self {
@@ -56,7 +59,6 @@ pub mod config {
             lockfile
         }
 
-
         fn read_config_file() -> String {
             let config_folder = Config::get_config_dir();
 
@@ -65,9 +67,15 @@ pub mod config {
                 let default_conf = toml::to_string(&Config::default()).unwrap();
                 let res = fs::write(config_file_path.clone(), default_conf);
                 if res.is_err() {
-                    panic!("failed to create default config file, {:#?}", res.unwrap_err())
+                    panic!(
+                        "failed to create default config file, {:#?}",
+                        res.unwrap_err()
+                    )
                 }
-                println!("default config file created at: {}", config_file_path.to_str().unwrap());
+                println!(
+                    "default config file created at: {}",
+                    config_file_path.to_str().unwrap()
+                );
                 println!("please complete the config file and relaunch this program");
                 exit(0);
             }

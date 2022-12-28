@@ -1,6 +1,6 @@
-use reqwest::Client;
-use crate::config::config::Config;
 use super::media::Session;
+use crate::config::config::Config;
+use reqwest::Client;
 
 pub struct PlexClient<'a> {
     config: &'a Config,
@@ -10,17 +10,11 @@ pub struct PlexClient<'a> {
 impl<'a> PlexClient<'a> {
     pub fn new(config: &'a Config) -> Self {
         let client = Client::new();
-        PlexClient {
-            config,
-            client,
-        }
+        PlexClient { config, client }
     }
-    
+
     pub async fn get_session(&self) -> serde_json::Result<Session> {
-        let res = self.get(
-            String::from("/status/sessions"),
-            None
-        ).await;
+        let res = self.get(String::from("/status/sessions"), None).await;
         if res.is_err() {
             panic!("cannot not get current session");
         }
@@ -29,7 +23,11 @@ impl<'a> PlexClient<'a> {
         Ok(result)
     }
 
-    async fn get(&self, path: String, query: Option<&Vec<(String, String)>>) -> reqwest::Result<String> {
+    async fn get(
+        &self,
+        path: String,
+        query: Option<&Vec<(String, String)>>,
+    ) -> reqwest::Result<String> {
         let mut parameters = format!("?X-Plex-Token={}", self.config.token);
         if query.is_some() {
             for (name, value) in query.unwrap().iter() {
@@ -37,7 +35,8 @@ impl<'a> PlexClient<'a> {
             }
         }
 
-        let res = self.client
+        let res = self
+            .client
             .get(format!("{}{}{}", self.config.origin, path, parameters))
             .header("Accept", "application/json")
             .send()
@@ -45,5 +44,3 @@ impl<'a> PlexClient<'a> {
         res.unwrap().text().await
     }
 }
-
-

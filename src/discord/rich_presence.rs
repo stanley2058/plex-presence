@@ -1,9 +1,9 @@
-use std::time::{UNIX_EPOCH, SystemTime};
-use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
-use discord_rich_presence::activity::{Activity, Assets, Timestamps};
-use urlencoding::encode;
 use crate::config::config::Config;
 use crate::plex::media::Session;
+use discord_rich_presence::activity::{Activity, Assets, Timestamps};
+use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
+use std::time::{SystemTime, UNIX_EPOCH};
+use urlencoding::encode;
 
 pub struct DiscordClient<'a> {
     config: &'a Config,
@@ -71,16 +71,15 @@ impl<'a> DiscordClient<'a> {
             .state(plex_act.state.as_str())
             .details(plex_act.details.as_str())
             .timestamps(plex_act.timestamps.clone())
-            .assets(
-                Assets::new()
-                    .large_image(plex_act.large_image.as_str())
-            );
+            .assets(Assets::new().large_image(plex_act.large_image.as_str()));
         self.update_activity(act)
     }
 
     pub fn plex_session_to_activity(&self, session: &Session) -> Option<DiscordPlexActivity> {
         let size = session.media_container.size;
-        if size <= 0 { return None; }
+        if size <= 0 {
+            return None;
+        }
 
         // find the most current player
         let mut sorted = session.media_container.metadata.clone();
@@ -95,16 +94,26 @@ impl<'a> DiscordClient<'a> {
         let state = format!("{} {}", player_status, metadata.grandparent_title);
         let details = format!("♫ {}", metadata.title);
 
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis();
-        let time_left = (((metadata.duration as u128) - (metadata.view_offset as u128) + now) / 1000) as i64;
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+        let time_left =
+            (((metadata.duration as u128) - (metadata.view_offset as u128) + now) / 1000) as i64;
         let timestamps = Timestamps::new().end(time_left);
 
-        let large_image = format!("{}/photo/:/transcode?url={}&X-Plex-Token={}&width=80&height=80",
-                self.config.origin,
-                encode(metadata.thumb.as_str()),
-                self.config.token
-            );
+        let large_image = format!(
+            "{}/photo/:/transcode?url={}&X-Plex-Token={}&width=80&height=80",
+            self.config.origin,
+            encode(metadata.thumb.as_str()),
+            self.config.token
+        );
 
-        Some(DiscordPlexActivity { state, details, timestamps, large_image })
+        Some(DiscordPlexActivity {
+            state,
+            details,
+            timestamps,
+            large_image,
+        })
     }
 }
