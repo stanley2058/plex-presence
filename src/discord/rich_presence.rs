@@ -82,9 +82,9 @@ impl<'a> DiscordClient<'a> {
         }
 
         // find the most current player
-        let mut sorted = session.media_container.metadata.clone();
-        sorted.sort_by(|a, b| (-a.added_at).cmp(&(-b.added_at)));
-        let metadata = &sorted[0];
+        let mut reversed = session.media_container.metadata.clone();
+        reversed.reverse();
+        let metadata = &reversed[0];
 
         let player_status = match metadata.player.state.as_str() {
             "playing" => "▶️",
@@ -92,7 +92,7 @@ impl<'a> DiscordClient<'a> {
         };
 
         let state = format!("{} {}", player_status, metadata.grandparent_title);
-        let details = format!("♫ {}", metadata.title);
+        let details = format!("🎵 {}", metadata.title);
 
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
