@@ -1,14 +1,17 @@
+mod activity_monitor;
+mod cleanup;
 mod config;
 mod discord;
 mod plex;
 
+use activity_monitor::activity_monitor::ActivityMonitor;
+use cleanup::cleanup::Cleanup;
 use config::config::Config;
-use ctrlc;
-use discord::rich_presence::DiscordClient;
+use discord::client::DiscordClient;
 use plex::client::PlexClient;
 use std::collections::HashSet;
 use std::process::{exit, Command, Stdio};
-use std::{env, fs, panic, thread, time};
+use std::{env, fs, panic};
 
 fn parse_args() {
     let args: Vec<String> = env::args().collect();
@@ -41,34 +44,18 @@ fn check_instance() {
     let _ = fs::write(lockfile, "");
 }
 
-fn handle_term_signal() {
-    let _ = ctrlc::set_handler(move || {
-        let lockfile = Config::get_lockfile();
-        let _ = fs::remove_file(lockfile);
-        exit(0);
-    });
-}
-
 #[tokio::main]
 async fn main() {
     parse_args();
     let cfg = Config::load();
     check_instance();
-    handle_term_signal();
+    let _c = Cleanup::new();
 
-    let plex_client = PlexClient::new(&cfg);
-    let dc_client = &mut DiscordClient::new(&cfg);
-    loop {
-        let session_res = plex_client.get_session().await;
-        if session_res.is_ok() {
-            let session = session_res.unwrap();
-            let act = dc_client.plex_session_to_activity(&session);
-            dc_client.update_plex_activity(act);
-        } else {
-            println!("cannot get session, {:#?}", session_res.unwrap_err());
-            dc_client.clear_activity();
-        }
-
-        thread::sleep(time::Duration::from_millis(1000));
-    }
+    ActivityMonitor::new(
+        DiscordClient::new(&cfg.discord_application_id),
+        PlexClient::new(&cfg.token, &cfg.origin),
+        &cfg,
+    )
+    .start()
+    .await;
 }

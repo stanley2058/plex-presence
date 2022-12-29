@@ -1,1 +1,1 @@
-pub mod rich_presence;
+pub mod client;
