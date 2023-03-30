@@ -7,9 +7,9 @@ pub struct DiscordClient {
 }
 
 impl DiscordClient {
-    pub fn new(discord_application_id: &String) -> Self {
-        let mut ipc_client = DiscordIpcClient::new(discord_application_id.as_str()).unwrap();
-        let _ = ipc_client.connect().unwrap();
+    pub fn new(discord_application_id: &str) -> Self {
+        let mut ipc_client = DiscordIpcClient::new(discord_application_id).unwrap();
+        ipc_client.connect().unwrap();
 
         DiscordClient {
             ipc_client,
@@ -40,7 +40,7 @@ impl DiscordClient {
             }
         }
 
-        let act = activity.as_ref().unwrap().into_activity();
+        let act = activity.as_ref().unwrap().to_activity();
         let set_result = self.ipc_client.set_activity(act);
         if set_result.is_err() {
             println!("cannot set activity");

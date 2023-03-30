@@ -1,4 +1,4 @@
-use crate::config::config::Config;
+use crate::config::Config;
 
 use super::activity::PlexActivity;
 use serde::Deserialize;
@@ -40,7 +40,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn into_activity(&self, config: &Config) -> Option<PlexActivity> {
+    pub fn to_activity(&self, config: &Config) -> Option<PlexActivity> {
         let size = self.media_container.size;
         if size <= 0 {
             return None;

@@ -12,7 +12,7 @@ pub struct PlexActivity {
 }
 
 impl PlexActivity {
-    pub fn into_activity(&self) -> Activity {
+    pub fn to_activity(&self) -> Activity {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()

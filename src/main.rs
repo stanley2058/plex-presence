@@ -4,9 +4,9 @@ mod config;
 mod discord;
 mod plex;
 
-use activity_monitor::activity_monitor::ActivityMonitor;
-use cleanup::cleanup::Cleanup;
-use config::config::Config;
+use activity_monitor::ActivityMonitor;
+use cleanup::Cleanup;
+use config::Config;
 use discord::client::DiscordClient;
 use plex::client::PlexClient;
 use std::collections::HashSet;
