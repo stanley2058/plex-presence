@@ -1,17 +1,16 @@
 mod activity_monitor;
-mod cleanup;
 mod config;
 mod discord;
 mod plex;
 
 use activity_monitor::ActivityMonitor;
-use cleanup::Cleanup;
 use config::Config;
 use discord::client::DiscordClient;
 use plex::client::PlexClient;
+use single_instance::SingleInstance;
 use std::collections::HashSet;
 use std::process::{exit, Command, Stdio};
-use std::{env, fs, panic};
+use std::{env, panic};
 
 fn parse_args() {
     let args: Vec<String> = env::args().collect();
@@ -28,28 +27,15 @@ fn parse_args() {
     }
 }
 
-fn check_instance() {
-    let lockfile = Config::get_lockfile();
-    if lockfile.exists() {
-        println!("=========================== Lockfile Detected ===========================");
-        println!(
-            "The lockfile is still present:\n{}",
-            lockfile.to_str().unwrap()
-        );
-        println!("This means there might already be a running instance.");
-        println!("If the program exited violently last time, delete the lockfile manually.");
-        println!("=========================================================================");
-        panic!("lockfile exist");
-    }
-    let _ = fs::write(lockfile, "");
-}
-
 #[tokio::main]
 async fn main() {
     parse_args();
     let cfg = Config::load();
-    check_instance();
-    let _c = Cleanup::new();
+
+    let instance = SingleInstance::new("plex-presence").unwrap();
+    if !instance.is_single() {
+        panic!("program already running");
+    }
 
     ActivityMonitor::new(
         DiscordClient::new(&cfg.discord_application_id),

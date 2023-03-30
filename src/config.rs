@@ -1,10 +1,6 @@
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::exit,
-};
+use std::{fs, path::Path, process::exit};
 
 fn discord_application_id() -> String {
     String::from("1057190283017719828")
@@ -49,12 +45,6 @@ impl Config {
         }
 
         String::from(config_dir.as_os_str().to_str().unwrap())
-    }
-
-    pub fn get_lockfile() -> PathBuf {
-        let config_dir = Config::get_config_dir();
-        let lockfile = Path::new(config_dir.as_str()).join("plex-presense.lock");
-        lockfile
     }
 
     fn read_config_file() -> String {
