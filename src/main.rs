@@ -1,35 +1,20 @@
 mod activity_monitor;
+mod arguments;
 mod config;
 mod discord;
 mod plex;
 
 use activity_monitor::ActivityMonitor;
+use arguments::parse_args;
 use config::Config;
 use discord::client::DiscordClient;
 use plex::client::PlexClient;
 use single_instance::SingleInstance;
-use std::collections::HashSet;
-use std::process::{exit, Command, Stdio};
-use std::{env, panic};
-
-fn parse_args() {
-    let args: Vec<String> = env::args().collect();
-    let mut args_set: HashSet<String> = HashSet::from_iter(args.clone());
-    if args_set.contains("-d") || args_set.contains("--daemon") {
-        args_set.remove("-d");
-        args_set.remove("--daemon");
-        let _ = Command::new(&args[0])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn();
-        exit(0);
-    }
-}
+use std::panic;
 
 #[tokio::main]
 async fn main() {
-    parse_args();
+    parse_args().await;
     let cfg = Config::load();
 
     let instance = SingleInstance::new("plex-presence").unwrap();
