@@ -77,11 +77,6 @@ pub async fn parse_args() {
         }
     }
 
-    let instance = SingleInstance::new(SOCKET_NAME).unwrap();
-    if !instance.is_single() {
-        panic!("program is already running, kill the existing program or use the -r option");
-    }
-
     if run_args.daemon_mode {
         let _ = Command::new(&run_args.program_name)
             .stdin(Stdio::null())
@@ -89,5 +84,10 @@ pub async fn parse_args() {
             .stderr(Stdio::null())
             .spawn();
         exit(0);
+    }
+
+    let instance = SingleInstance::new(SOCKET_NAME).unwrap();
+    if !instance.is_single() {
+        panic!("program is already running, kill the existing program or use the -r option");
     }
 }
