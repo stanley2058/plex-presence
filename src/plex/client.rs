@@ -1,4 +1,5 @@
 use super::media::Session;
+use anyhow::Result;
 use reqwest::Client;
 
 pub struct PlexClient<'a> {
@@ -18,14 +19,8 @@ impl<'a> PlexClient<'a> {
     }
 
     /// Gets active sessions from Plex
-    ///
-    /// # Panic
-    /// Panics if request error, indicating Plex server not reachable.
-    pub async fn get_session(&self) -> serde_json::Result<Session> {
-        let res = self
-            .get(String::from("/status/sessions"), None)
-            .await
-            .unwrap();
+    pub async fn get_session(&self) -> Result<Session> {
+        let res = self.get("/status/sessions", None).await?;
         let result: Session = serde_json::from_str(res.as_str())?;
         Ok(result)
     }
@@ -36,14 +31,10 @@ impl<'a> PlexClient<'a> {
     ///
     /// * `path` - A string gets append to the Plex origin url.
     /// * `query` - A vector of tuples containing additional query parameters.
-    async fn get(
-        &self,
-        path: String,
-        query: Option<&Vec<(String, String)>>,
-    ) -> reqwest::Result<String> {
+    async fn get(&self, path: &str, query: Option<&Vec<(String, String)>>) -> Result<String> {
         let mut parameters = format!("?X-Plex-Token={}", self.plex_token);
-        if query.is_some() {
-            for (name, value) in query.unwrap().iter() {
+        if let Some(query) = query {
+            for (name, value) in query.iter() {
                 parameters.push_str(format!("&{name}={value}").as_str());
             }
         }
@@ -53,7 +44,9 @@ impl<'a> PlexClient<'a> {
             .get(format!("{}{}{}", self.plex_origin, path, parameters))
             .header("Accept", "application/json")
             .send()
-            .await;
-        res.unwrap().text().await
+            .await?
+            .text()
+            .await?;
+        Ok(res)
     }
 }
