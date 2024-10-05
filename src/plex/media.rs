@@ -63,9 +63,10 @@ impl Session {
             .as_millis() as i64;
 
         let large_image = format!(
-            "{}/photo/:/transcode?url={}&X-Plex-Token={}&width=80&height=80",
+            "{}/photo/:/transcode?url={}%3FX-Plex-Token%3D{}&X-Plex-Token={}&width=80&height=80",
             config.origin,
             encode(metadata.thumb.as_str()),
+            config.token,
             config.token
         );
 
