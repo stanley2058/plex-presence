@@ -24,14 +24,19 @@ impl<'a> ActivityMonitor<'a> {
 
     pub async fn start(&mut self) {
         loop {
-            self.fetch_and_update().await;
-            thread::sleep(Duration::from_millis(1000));
+            let is_playing = self.fetch_and_update().await;
+            if is_playing {
+                thread::sleep(Duration::from_secs(1));
+            } else {
+                thread::sleep(Duration::from_secs(60));
+            }
         }
     }
 
-    async fn fetch_and_update(&mut self) {
+    async fn fetch_and_update(&mut self) -> bool {
         let session_res = self.plex_client.get_session().await;
-        if session_res.is_ok() {
+        let has_session = session_res.is_ok();
+        if has_session {
             let session = session_res.unwrap();
             self.discord_client
                 .update_activity(session.to_activity(self.config));
@@ -39,5 +44,6 @@ impl<'a> ActivityMonitor<'a> {
             // no session alive, clear activity
             self.discord_client.clear_activity();
         }
+        has_session
     }
 }
